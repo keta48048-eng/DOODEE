@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ระบบบันทึกรายรับรายจ่าย พร้อมกราฟ ประวัติ และเชื่อมต่อ Excel ด้วย CSV">
+  <title>My Finance | ระบบการเงิน</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="logo">฿</div><div><h1>My Finance</h1><p>ระบบจัดการการเงินส่วนตัว</p></div></div>
+  <div class="top-actions"><span class="local-status"><i></i> บันทึกอัตโนมัติในเครื่องนี้</span><button class="btn btn-outline" id="exportBtn">ส่งออก Excel / CSV</button></div>
+</header>
+<main class="container">
+  <section class="welcome">
+    <div><p class="eyebrow">PERSONAL FINANCE DASHBOARD</p><h2>ภาพรวมการเงินของคุณ</h2><p class="muted">บันทึก ตรวจสอบ และวางแผนรายรับรายจ่ายได้ง่ายขึ้น</p></div>
+    <label class="month-picker">เลือกเดือน<input type="month" id="monthFilter"></label>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card income"><div class="card-top"><span>รายรับทั้งหมด</span><span class="symbol">↗</span></div><strong id="incomeTotal">฿0.00</strong><small>ในเดือนที่เลือก</small></article>
+    <article class="summary-card expense"><div class="card-top"><span>รายจ่ายทั้งหมด</span><span class="symbol">↘</span></div><strong id="expenseTotal">฿0.00</strong><small>ในเดือนที่เลือก</small></article>
+    <article class="summary-card balance"><div class="card-top"><span>เงินคงเหลือสุทธิ</span><span class="symbol">฿</span></div><strong id="balanceTotal">฿0.00</strong><small>รายรับ − รายจ่าย</small></article>
+    <article class="summary-card count"><div class="card-top"><span>จำนวนรายการ</span><span class="symbol">≡</span></div><strong id="countTotal">0</strong><small>รายการในเดือนนี้</small></article>
+  </section>
+
+  <section class="charts-grid">
+    <article class="panel chart-panel"><div class="panel-title"><div><h3>รายรับเทียบรายจ่าย</h3><p class="muted">สรุปตามวันที่ในเดือนที่เลือก</p></div><span class="tag">กราฟแท่ง</span></div><div class="chart-wrap"><canvas id="barChart" aria-label="กราฟรายรับเทียบรายจ่าย"></canvas></div></article>
+    <article class="panel chart-panel"><div class="panel-title"><div><h3>สัดส่วนรายจ่าย</h3><p class="muted">แยกตามหมวดหมู่</p></div><span class="tag">กราฟวงกลม</span></div><div class="chart-wrap doughnut-wrap"><canvas id="pieChart" aria-label="กราฟสัดส่วนรายจ่าย"></canvas></div></article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-title"><div><h3 id="formHeading">เพิ่มรายการใหม่</h3><p class="muted">บันทึกรายรับหรือรายจ่ายของคุณ</p></div><span class="tag">รายการ</span></div>
+      <form id="transactionForm">
+        <input type="hidden" id="editId">
+        <div class="type-tabs"><button class="type-tab active income-tab" type="button" data-type="income">＋ รายรับ</button><button class="type-tab expense-tab" type="button" data-type="expense">－ รายจ่าย</button></div>
+        <label>ชื่อรายการ <b>*</b><input id="title" required maxlength="100" placeholder="เช่น เงินเดือน, ค่าอาหาร"></label>
+        <div class="field-row">
+          <label>จำนวนเงิน (บาท) <b>*</b><input id="amount" required type="number" min="0.01" step="0.01" placeholder="0.00"></label>
+          <label>วันที่ <b>*</b><input id="date" required type="date"></label>
+        </div>
+        <label>หมวดหมู่<select id="category"></select></label>
+        <label>หมายเหตุ<textarea id="note" rows="2" maxlength="300" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"></textarea></label>
+        <div class="form-buttons"><button class="btn btn-primary" id="saveBtn" type="submit">บันทึกรายการ</button><button class="btn btn-light hidden" id="cancelEdit" type="button">ยกเลิก</button><button class="btn btn-ghost" id="clearForm" type="button">ล้างแบบฟอร์ม</button></div>
+      </form>
+    </article>
+
+    <article class="panel">
+      <div class="panel-title"><div><h3>นำเข้า / ส่งออก Excel</h3><p class="muted">สำรองข้อมูลหรือย้ายข้อมูลจาก Excel</p></div><span class="tag">ไฟล์</span></div>
+      <div class="excel-box"><div class="excel-icon">X</div><div><strong>ส่งออกเป็น CSV</strong><p>เปิดด้วย Microsoft Excel ได้</p></div><button class="btn btn-primary" id="exportBtn2" type="button">ดาวน์โหลด</button></div>
+      <div class="import-box"><strong>นำเข้าจาก CSV</strong><p class="muted">ใช้ไฟล์ CSV ที่มีหัวคอลัมน์: วันที่, รายการ, ประเภท, หมวดหมู่, จำนวนเงิน, หมายเหตุ</p><label class="file-picker">เลือกไฟล์ CSV<input id="importFile" type="file" accept=".csv,text/csv"></label><p class="tiny">การนำเข้าจะเพิ่มรายการลงในข้อมูลเดิม ไม่ลบข้อมูลเก่า</p></div>
+      <div class="notice"><strong>วิธีใช้กับ Excel</strong><ol><li>กดส่งออกเพื่อดาวน์โหลดไฟล์ CSV</li><li>เปิดไฟล์ด้วย Microsoft Excel</li><li>แก้ไขใน Excel แล้วบันทึกเป็น CSV UTF-8</li><li>เลือกไฟล์ CSV ที่แก้แล้วเพื่อนำกลับเข้าเว็บ</li></ol></div>
+    </article>
+  </section>
+
+  <section class="panel history-panel">
+    <div class="panel-title history-title"><div><h3>ประวัติรายรับ–รายจ่าย</h3><p class="muted">ตรวจสอบย้อนหลัง ค้นหา แก้ไข และลบรายการ</p></div><button class="btn btn-outline" id="exportBtn3">ส่งออก CSV</button></div>
+    <div class="filters"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="ค้นหาชื่อรายการหรือหมายเหตุ..."></label><select id="typeFilter" aria-label="กรองประเภท"><option value="">ทุกประเภท</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select><select id="categoryFilter" aria-label="กรองหมวดหมู่"><option value="">ทุกหมวดหมู่</option></select></div>
+    <div class="table-wrap"><table><thead><tr><th>วันที่</th><th>รายการ</th><th>หมวดหมู่</th><th>ประเภท</th><th>จำนวนเงิน</th><th>หมายเหตุ</th><th>จัดการ</th></tr></thead><tbody id="historyBody"></tbody></table><div class="empty hidden" id="emptyState"><div class="empty-coin">฿</div><strong>ยังไม่มีรายการ</strong><p>เพิ่มรายการแรกของคุณได้จากแบบฟอร์มด้านบน</p></div></div>
+    <div class="table-bottom"><span id="tableCount">0 รายการ</span><button id="deleteAll" class="danger-link">ลบรายการทั้งหมด</button></div>
+  </section>
+  <p class="privacy"><strong>ข้อมูลส่วนตัว:</strong> เวอร์ชันนี้เก็บข้อมูลในเบราว์เซอร์เครื่องนี้ ไม่เชื่อมบัญชีธนาคารและไม่ซิงก์ข้ามอุปกรณ์ โปรดสำรอง CSV เป็นระยะ หากต้องการให้หลายคนใช้ข้อมูลชุดเดียวกัน ต้องเพิ่มฐานข้อมูลออนไลน์และระบบล็อกอิน</p>
+</main>
+<footer>My Finance · ระบบการเงินส่วนตัว</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="script.js"></script>
+</body>
+</html>
