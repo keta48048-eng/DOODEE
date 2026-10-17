@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="ระบบบันทึกรายรับรายจ่าย พร้อมกราฟ ประวัติ และเชื่อมต่อ Excel ด้วย CSV">
+  <meta name="theme-color" content="#2563EB">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <title>My Finance | ระบบการเงิน</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -67,5 +70,12 @@
 <footer>My Finance · ระบบการเงินส่วนตัว</footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="script.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(err => console.warn("Service worker registration failed:", err));
+    });
+  }
+</script>
 </body>
 </html>
